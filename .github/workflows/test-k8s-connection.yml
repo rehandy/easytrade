@@ -1,0 +1,32 @@
+name: Test Kubernetes Connection
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  test-k8s-connection:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+        
+      - name: Test connection to cluster
+        run: |
+          kubectl get nodes
+          echo "Successfully connected to the cluster"
+          
+      - name: Apply sample configuration
+        run: |
+          # Apply a specific manifest file or directory
+          # This is just to test the apply functionality
+          kubectl apply -f kubernetes-manifests/base/your-specific-file.yaml -n easytrade || echo "Test apply failed, but connection was successful"
